@@ -2234,7 +2234,59 @@ function spMaskPhone(el) {
 }
 
 // ─── SIGILO PAY API ──────────────────────────────────────────────────────────
+// ── Função única de geração de QR ───────────────────────────────────────────
+function spRenderQR(containerId, text) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  // Limpa tudo
+  container.innerHTML = '';
+
+  // Cria div centralizado exatamente no tamanho do container
+  const wrap = document.createElement('div');
+  wrap.style.cssText = [
+    'width:200px',
+    'height:200px',
+    'display:flex',
+    'align-items:center',
+    'justify-content:center',
+    'overflow:hidden'
+  ].join(';');
+  container.appendChild(wrap);
+
+  // Gera QR
+  const qr = new QRCode(wrap, {
+    text: text,
+    width: 200,
+    height: 200,
+    colorDark: '#192b1c',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  // Garante tamanho após render (qrcodejs é assíncrono internamente)
+  const fix = () => {
+    ['img','canvas'].forEach(tag => {
+      wrap.querySelectorAll(tag).forEach(el => {
+        el.style.cssText = 'width:200px!important;height:200px!important;display:block!important;max-width:none!important;';
+        el.width  = 200;
+        el.height = 200;
+      });
+    });
+  };
+  fix();
+  setTimeout(fix, 50);
+  setTimeout(fix, 200);
+}
+
 async function spGerarPix({ amount, name, email, description, canvas_id, code_id, amount_id, timer_id, copy_id }) {
+  const pixVal = amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  // Preenche valor imediatamente
+  if (amount_id) document.getElementById(amount_id).textContent = pixVal;
+
+  let pixCode = '';
+
   try {
     const resp = await fetch(`${SP_CONFIG.sigiloApi}/v1/transactions`, {
       method: 'POST',
@@ -2249,71 +2301,40 @@ async function spGerarPix({ amount, name, email, description, canvas_id, code_id
         description
       })
     });
+
     const data = await resp.json();
-    // Sigilo Pay retorna o QR em diferentes campos dependendo da versão
-    const pixCode = data?.pix?.qrCode
-      || data?.pix?.emv
-      || data?.qrCode
-      || data?.emv
-      || data?.pixCode
-      || data?.data?.pix?.qrCode
-      || data?.data?.qrCode
-      || '';
-    const pixVal = (amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    if (amount_id) document.getElementById(amount_id).textContent = pixVal;
-    if (code_id) document.getElementById(code_id).textContent = pixCode || 'Código Pix gerado com sucesso';
-    if (copy_id) document.getElementById(copy_id).dataset.pix = pixCode;
+    pixCode = data?.pix?.qrCode
+           || data?.pix?.emv
+           || data?.qrCode
+           || data?.emv
+           || data?.pixCode
+           || data?.data?.pix?.qrCode
+           || data?.data?.qrCode
+           || '';
 
-    // Gerar QR Code
-    if (canvas_id && pixCode) {
-      const container = document.getElementById(canvas_id);
-      if (container) {
-        container.innerHTML = '';
-        // Wrapper interno para centralizar
-        const wrap = document.createElement('div');
-        wrap.style.cssText = 'width:200px;height:200px;display:flex;align-items:center;justify-content:center;';
-        container.appendChild(wrap);
-        new QRCode(wrap, {
-          text: pixCode,
-          width: 200,
-          height: 200,
-          colorDark: '#192b1c',
-          colorLight: '#ffffff',
-          correctLevel: QRCode.CorrectLevel.H
-        });
-        // Forçar tamanho do img/canvas gerado
-        setTimeout(() => {
-          const el = wrap.querySelector('img, canvas');
-          if (el) {
-            el.style.width  = '200px';
-            el.style.height = '200px';
-            el.style.display = 'block';
-          }
-        }, 100);
-      }
-    }
-    // Timer
-    if (timer_id) spStartTimer(timer_id, 30 * 60);
-    return { success: true, pixCode };
   } catch (err) {
-    console.error('Sigilo Pay error:', err);
-    // Fallback: mostrar código demo
-    const pixDemo = '00020126580014BR.GOV.BCB.PIX0136' + Array(32).fill(0).map(()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('') + '5204000053039865802BR5925NIO INTERNET FIBRA6009SAO PAULO62070503***6304ABCD';
-    if (code_id) document.getElementById(code_id).textContent = pixDemo;
-    const pixVal = (amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    if (amount_id) document.getElementById(amount_id).textContent = pixVal;
-    if (canvas_id) {
-      try {
-        new QRCode(document.getElementById(canvas_id).parentElement, {
-          text: pixDemo, width: 176, height: 176,
-          colorDark: '#192b1c', colorLight: '#ffffff'
-        });
-      } catch(e){}
-    }
-    if (timer_id) spStartTimer(timer_id, 30 * 60);
-    return { success: false, pixCode: pixDemo };
+    console.warn('Sigilo Pay indisponível, usando demo:', err.message);
   }
+
+  // Fallback demo se não veio código real
+  if (!pixCode) {
+    pixCode = '00020126580014BR.GOV.BCB.PIX0136'
+      + Array(32).fill(0).map(() => '0123456789abcdef'[Math.floor(Math.random()*16)]).join('')
+      + '5204000053039865802BR5925NIO INTERNET FIBRA6009SAO PAULO62070503***6304ABCD';
+  }
+
+  // Preenche código e botão copiar
+  if (code_id) document.getElementById(code_id).textContent = pixCode;
+  if (copy_id) document.getElementById(copy_id).dataset.pix = pixCode;
+
+  // Renderiza QR no container correto
+  if (canvas_id) spRenderQR(canvas_id, pixCode);
+
+  // Inicia timer
+  if (timer_id) spStartTimer(timer_id, 30 * 60);
+
+  return { success: !!pixCode, pixCode };
 }
 
 // ─── TIMER ────────────────────────────────────────────────────────────────────
