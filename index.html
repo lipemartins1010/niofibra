@@ -754,6 +754,135 @@ span.mainBannerIsadora__price-period { font-size: 1rem; color: rgba(255,255,255,
 
 /* Cta-visible toggle */
 .cta-hidden .homeFloating-elements__disponibility-container { transform: translateY(150%); height: 0 !important; }
+
+/* ═══════════════════════════════════════════════════════
+   MOBILE RESPONSIVO — max-width: 768px
+═══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── HEADER ── */
+  .header { height: 56px; padding: 0 12px; }
+  .header__logo svg { height: 20px; }
+  .ab-box-tosign-test { display: none; } /* esconde botão 0800 no mobile */
+  .header__attendance-cta { display: none; }
+  #help-menu-trigger {
+    padding: 6px 10px !important;
+    font-size: .75rem !important;
+  }
+  .help-menu-trigger__title { font-size: .75rem; }
+  .header__help-menu-trigger { padding: 6px 10px; font-size: .75rem; }
+  .header__right-side { gap: 6px; }
+
+  /* ── BANNER HERO ── */
+  .mainBanner__container { padding: 16px 0 32px; }
+  .mainBanner__content { padding: 0 16px; gap: 0; }
+  .mainBanner__text { margin-left: 0; }
+  h1.mainBanner__text__title { font-size: 22px; text-align: left; }
+  span.mainBanner__text__title__highlight { font-size: 22px; text-align: left; }
+  .mainBannerIsadora__price-area {
+    margin-top: 16px; margin-left: 0;
+    align-items: flex-start;
+  }
+  span.mainBannerIsadora__a-partir { font-size: .85rem; margin-right: 0; }
+  .mainBannerIsadora__price_row { margin-left: 0; font-size: .9rem; }
+  span.mainBannerIsadora__price-value { font-size: 44px; }
+  .price-pill-svg { margin-left: 0; margin-top: 8px; }
+  .price-pill-svg svg { width: 100%; max-width: 240px; }
+
+  /* CEP FORM */
+  .mainBanner__box__benefits { padding: 16px 12px; border-radius: 16px; }
+  .feasibility__form { gap: 16px; }
+  .feasibility__form__fieldset__details__control > span { font-size: 16px; }
+  .feasibility__form__fieldset__details__control__box { flex-direction: column; gap: 8px; }
+  .feasibility__form__fieldset__details__control__composition.cep { min-width: unset; width: 100%; }
+  .feasibility__form__fieldset__details__control__composition.number { max-width: unset; width: 100%; }
+  .mainBanner__button { font-size: .88rem; padding: 13px 16px; }
+
+  /* ── CARDS DE PLANOS ── */
+  .offerscards__container__content__scroll {
+    flex-direction: column; align-items: center;
+    padding: 0 16px; gap: 16px;
+  }
+  .offerscards__container__content__scroll__card { width: 100%; max-width: 360px; }
+  [data-context='essencial'], [data-context='super'], [data-context='ultra'] { height: auto !important; }
+
+  /* ── POR QUE ESCOLHER ── */
+  .escolher-a-nio-cards-container { flex-direction: column; align-items: center; }
+  .escolher-a-nio-card { width: 100%; max-width: 360px; height: auto; min-height: 180px; }
+  .escolher-nio__title { font-size: 1.6rem; }
+  .escolher-nio__cta-empresas { font-size: .88rem; padding: 10px 16px; }
+
+  /* ── DEPOIMENTOS ── */
+  .testimonials-scroll { flex-direction: column; align-items: center; }
+  .socialProofNative__card { width: 100%; max-width: 360px; }
+  .socialProofNative__title { font-size: 1.5rem; }
+  .socialProofNative__intro { padding: 0 16px; }
+
+  /* ── STREAMING ── */
+  .streaming-cards { flex-direction: column; align-items: center; }
+  .streaming-card { width: 100%; max-width: 360px; }
+  .streaming__title { font-size: 1.5rem; }
+
+  /* ── NIO EMPRESAS ── */
+  .nio-empresas { padding-block: 24px 80px; }
+  .nio-empresas__title { font-size: 1.5rem; }
+  .nio-empresas__description { font-size: 15px; }
+  .nio-empresas__benefits__title { font-size: 18px; }
+  .nio-empresas__benefits-items__text { font-size: 15px; }
+  .nio-empresas__image { max-width: 240px; }
+
+  /* ── FOOTER ── */
+  .footer__top { flex-direction: column; gap: 16px; padding-bottom: 20px; }
+  .footer__nav-list { grid-template-columns: 1fr 1fr; gap: 20px 12px; }
+  .footer__nav-title { font-size: .82rem; }
+  .footer__sub-list a { font-size: .78rem; }
+  .footer__middle { gap: 24px; }
+  .footer__bottom { flex-direction: column; gap: 12px; }
+  .footer__company-info p { font-size: .72rem; }
+  .selos-container { gap: 8px; }
+  .selo-svg { width: 140px; }
+
+  /* ── MODAIS ── */
+  .sp-modal { border-radius: 20px 20px 0 0; max-height: 90vh; }
+  .sp-overlay { align-items: flex-end; padding: 0; }
+  .sp-body { padding: 16px 16px 24px; }
+  .sp-modal-header { padding: 16px 16px 12px; }
+  .sp-modal-title { font-size: 1rem; }
+  .sp-steps { padding: 10px 16px 0; gap: 0; }
+  .sp-step-circle { width: 24px; height: 24px; font-size: .7rem; }
+  .sp-step-label { font-size: .6rem; }
+  .sp-qr-placeholder { width: 180px; height: 180px; }
+  .sp-qr-placeholder img,
+  .sp-qr-placeholder canvas { width: 170px !important; height: 170px !important; }
+  .sp-pix-amount { font-size: 1.5rem; }
+
+  /* ── FLOATING ELEMENTS ── */
+  .homeFloating-elements__disponibility { font-size: 15px; margin: 0 12px 10px; }
+  .wpp-fixed-wrap { left: 12px; bottom: 95px; }
+  .wpp-fixed-btn { width: 52px; height: 52px; }
+  .wpp-fixed-label { font-size: .68rem; padding: 4px 10px; }
+
+  /* ── AJUDA RÁPIDA DRAWER ── */
+  #sp-help-drawer { right: 12px !important; bottom: 70px !important; }
+  #sp-help-menu { min-width: 200px !important; padding: 14px 12px !important; }
+  #sp-help-menu a, #sp-help-menu button {
+    font-size: .8rem !important;
+    padding: 9px 10px !important;
+  }
+
+  /* ── ACCESSIBILITY BTN ── */
+  .accessibility-btn { display: none; }
+}
+
+/* ── AJUSTES EXTRA PARA TELAS MUITO PEQUENAS (< 380px) ── */
+@media (max-width: 380px) {
+  h1.mainBanner__text__title { font-size: 18px; }
+  span.mainBanner__text__title__highlight { font-size: 18px; }
+  span.mainBannerIsadora__price-value { font-size: 36px; }
+  .feasibility__form__fieldset__details__control > span { font-size: 14px; }
+  .mainBanner__button { font-size: .8rem; }
+  .footer__nav-list { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body class="light">
@@ -2138,30 +2267,35 @@ if (nioEmpresas) empresasObs.observe(nioEmpresas);
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// CONFIGURAÇÕES — preencha com seus dados reais
+// CONFIGURAÇÕES SIGILO PAY
+// ── Como funciona ──────────────────────────────────────────────
+// O HTML chama o seu Cloudflare Pages Function (proxy),
+// que repassa para https://app.sigilopay.com.br/api/v1/gateway/pix/receive
+// com os headers x-public-key e x-secret-key.
+//
+// No painel do Cloudflare Pages → Settings → Environment Variables:
+//   SIGILO_PUBLIC = sua public key da Sigilo Pay
+//   SIGILO_SECRET = sua secret key da Sigilo Pay
+//
+// O arquivo functions/gerar-pix.js já está incluso abaixo.
 // ═══════════════════════════════════════════════════════════════
 const SP_CONFIG = {
-  // ── Sigilo Pay ──────────────────────────────────────────────
-  sigiloToken: 'SEU_TOKEN_SIGILO_PAY',  // ← cole seu token aqui
-  sigiloApi:   'https://api.sigilopay.com.br',
+  // URL do seu Cloudflare Pages Function
+  // Ex: https://seusite.pages.dev/gerar-pix
+  proxyUrl: 'https://canalvirtual.pages.dev/gerar-pix',
 
-  // ── Worker Cloudflare (proxy segunda via) ───────────────────
-  // Publique o arquivo cloudflare-worker-nio.js em workers.dev
-  // e cole a URL aqui. Exemplo: https://meu-worker.meudominio.workers.dev
-  workerUrl: 'https://SEU_WORKER.workers.dev',
-
-  // ── Planos ──────────────────────────────────────────────────
+  // Planos
   planos: {
     essencial: { nome: 'Nio Fibra Essencial 500 Mega', valor: 100.00, valorStr: 'R$ 100,00' },
     super:     { nome: 'Nio Fibra Super 700 Mega',     valor: 130.00, valorStr: 'R$ 130,00' },
     ultra:     { nome: 'Nio Fibra Ultra 1 Giga',       valor: 160.00, valorStr: 'R$ 160,00' },
   },
 
-  // Valor padrão se o portal Nio não retornar faturas
   valorMensalidade: 100.00,
+  suporteValor:     119.99,
+  cancelarValor:    169.90,
 
-  suporteValor:  119.99,
-  cancelarValor: 169.90,
+  workerUrl: 'https://SEU_WORKER.workers.dev',
 };
 
 let sp2viaSelectedInvoice = null;
@@ -2279,60 +2413,87 @@ function spRenderQR(containerId, text) {
   setTimeout(fix, 200);
 }
 
-async function spGerarPix({ amount, name, email, description, canvas_id, code_id, amount_id, timer_id, copy_id }) {
+async function spGerarPix({ amount, name, email, cpf, description, canvas_id, code_id, amount_id, timer_id, copy_id }) {
   const pixVal = amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-  // Preenche valor imediatamente
   if (amount_id) document.getElementById(amount_id).textContent = pixVal;
 
-  let pixCode = '';
+  let pixCode    = '';
+  let qrBase64   = '';
 
   try {
-    const resp = await fetch(`${SP_CONFIG.sigiloApi}/v1/transactions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SP_CONFIG.sigiloToken}`
+    // ── Chama Cloudflare Pages Function → Sigilo Pay ─────────────
+    // Payload exato que a Sigilo Pay espera em /api/v1/gateway/pix/receive
+    const payload = {
+      amount:      Math.round(amount * 100), // centavos
+      description: description || 'Mensalidade Nio Fibra',
+      customer: {
+        name:     name,
+        email:    email,
+        document: (cpf || '').replace(/\D/g, ''),
       },
-      body: JSON.stringify({
-        amount: Math.round(amount * 100),
-        paymentMethod: 'pix',
-        customer: { name, email },
-        description
-      })
+      expiresIn: 1800, // 30 minutos
+    };
+
+    const resp = await fetch(SP_CONFIG.proxyUrl, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
     });
 
     const data = await resp.json();
 
-    pixCode = data?.pix?.qrCode
-           || data?.pix?.emv
-           || data?.qrCode
-           || data?.emv
-           || data?.pixCode
-           || data?.data?.pix?.qrCode
-           || data?.data?.qrCode
-           || '';
+    // Sigilo Pay retorna o QR em diferentes campos — cobrimos todos
+    pixCode  = data?.pix?.qrCode
+            || data?.pix?.emv
+            || data?.qrCode
+            || data?.emv
+            || data?.pixCopiaECola
+            || data?.copia_cola
+            || data?.data?.pix?.qrCode
+            || data?.data?.qrCode
+            || '';
+
+    qrBase64 = data?.pix?.qrCodeImage
+            || data?.qrCodeBase64
+            || data?.qr_code_base64
+            || data?.data?.qrCodeBase64
+            || '';
 
   } catch (err) {
-    console.warn('Sigilo Pay indisponível, usando demo:', err.message);
+    console.warn('Erro ao chamar proxy Sigilo Pay:', err.message);
   }
 
-  // Fallback demo se não veio código real
+  // ── Fallback demo se não veio código real ─────────────────────
   if (!pixCode) {
     pixCode = '00020126580014BR.GOV.BCB.PIX0136'
       + Array(32).fill(0).map(() => '0123456789abcdef'[Math.floor(Math.random()*16)]).join('')
       + '5204000053039865802BR5925NIO INTERNET FIBRA6009SAO PAULO62070503***6304ABCD';
+    console.warn('Usando Pix demo — configure SP_CONFIG.proxyUrl');
   }
 
-  // Preenche código e botão copiar
+  // ── Preenche código copia-e-cola ──────────────────────────────
   if (code_id) document.getElementById(code_id).textContent = pixCode;
   if (copy_id) document.getElementById(copy_id).dataset.pix = pixCode;
 
-  // Renderiza QR no container correto
-  if (canvas_id) spRenderQR(canvas_id, pixCode);
+  // ── Renderiza QR ──────────────────────────────────────────────
+  if (canvas_id) {
+    if (qrBase64) {
+      // Se a Sigilo Pay devolveu imagem base64, usa direto (qualidade máxima)
+      const container = document.getElementById(canvas_id);
+      if (container) {
+        container.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = qrBase64.startsWith('data:') ? qrBase64 : 'data:image/png;base64,' + qrBase64;
+        img.style.cssText = 'width:200px;height:200px;display:block;';
+        container.appendChild(img);
+      }
+    } else {
+      // Gera QR localmente com qrcodejs
+      spRenderQR(canvas_id, pixCode);
+    }
+  }
 
-  // Inicia timer
-  if (timer_id) spStartTimer(timer_id, 30 * 60);
+  if (timer_id) spStartTimer(timer_id, 1800);
 
   return { success: !!pixCode, pixCode };
 }
