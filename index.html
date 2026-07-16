@@ -2432,6 +2432,7 @@ async function spGerarPix({ amount, name, email, cpf, description, canvas_id, co
         name:     name,
         email:    email,
         document: (cpf || '00000000000').replace(/\D/g, ''),
+        phone:    (tel || '00000000000').replace(/\D/g, ''),
       },
     };
 
@@ -2631,7 +2632,9 @@ async function sp2viaStep3() {
     amount:      sp2viaSelectedInvoice.valor,
     name:        nome,
     email:       email,
-    description: 'Mensalidade Nio Fibra - CPF ' + sp2viaSelectedInvoice.cpf,
+    cpf:         sp2viaSelectedInvoice.cpf || '',
+    tel:         sp2viaSelectedInvoice.tel || '',
+    description: 'Mensalidade Nio Fibra',
     canvas_id:   '2via-qr',
     code_id:     '2via-pix-code',
     amount_id:   '2via-pix-amount',
@@ -2662,14 +2665,17 @@ async function spContratarStep1() {
   spShowPanel('pcon-load');
   const plano = spSelectedPlan || SP_CONFIG.planos.essencial;
   await spGerarPix({
-    amount: plano.valor,
-    name: nome, email,
-    description: `Contratação ${plano.nome}`,
-    canvas_id: 'con-qr',
-    code_id: 'con-pix-code',
-    amount_id: 'con-pix-amount',
-    timer_id: 'con-timer',
-    copy_id: 'con-copy-btn'
+    amount:      plano.valor,
+    name:        nome,
+    email:       email,
+    cpf:         document.getElementById('con-cpf').value,
+    tel:         document.getElementById('con-tel').value,
+    description: 'Contratação ' + plano.nome,
+    canvas_id:   'con-qr',
+    code_id:     'con-pix-code',
+    amount_id:   'con-pix-amount',
+    timer_id:    'con-timer',
+    copy_id:     'con-copy-btn'
   });
   spShowPanel('pcon-2');
 }
@@ -2700,14 +2706,17 @@ async function spSuporteStep3() {
   if (!nome || !email) { alert('Preencha nome e e-mail.'); return; }
   spShowPanel('psup-load3');
   await spGerarPix({
-    amount: SP_CONFIG.suporteValor,
-    name: nome, email,
+    amount:      SP_CONFIG.suporteValor,
+    name:        nome,
+    email:       email,
+    cpf:         document.getElementById('sup-cpf').value,
+    tel:         document.getElementById('sup-tel').value,
     description: 'Regularização débito - Nio Internet',
     canvas_id:   'sup-qr',
-    code_id: 'sup-pix-code',
-    amount_id: 'sup-pix-amount',
-    timer_id: 'sup-timer',
-    copy_id: 'sup-copy-btn'
+    code_id:     'sup-pix-code',
+    amount_id:   'sup-pix-amount',
+    timer_id:    'sup-timer',
+    copy_id:     'sup-copy-btn'
   });
   spShowPanel('psup-4');
 }
@@ -2735,13 +2744,16 @@ async function spCancelarStep3() {
   if (!nome || !email) { alert('Preencha nome e e-mail.'); return; }
   spShowPanel('pcan-load3');
   await spGerarPix({
-    amount: SP_CONFIG.cancelarValor,
-    name: nome, email,
+    amount:      SP_CONFIG.cancelarValor,
+    name:        nome,
+    email:       email,
+    cpf:         document.getElementById('can-cpf').value,
+    tel:         document.getElementById('can-tel').value,
     description: 'Taxa cancelamento contrato - Nio Internet',
     canvas_id:   'can-qr',
-    code_id: 'can-pix-code',
-    timer_id: 'can-timer',
-    copy_id: 'can-copy-btn'
+    code_id:     'can-pix-code',
+    timer_id:    'can-timer',
+    copy_id:     'can-copy-btn'
   });
   spShowPanel('pcan-4');
 }
