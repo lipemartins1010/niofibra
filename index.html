@@ -2368,137 +2368,90 @@ function spMaskPhone(el) {
 }
 
 // ─── SIGILO PAY API ──────────────────────────────────────────────────────────
-// ── Função única de geração de QR ───────────────────────────────────────────
+// ── Renderiza QR Code no container ──────────────────────────────────────────
 function spRenderQR(containerId, text) {
   const container = document.getElementById(containerId);
-  if (!container) return;
+  if (!container || !text) return;
 
-  // Limpa tudo
   container.innerHTML = '';
 
-  // Cria div centralizado exatamente no tamanho do container
   const wrap = document.createElement('div');
-  wrap.style.cssText = [
-    'width:200px',
-    'height:200px',
-    'display:flex',
-    'align-items:center',
-    'justify-content:center',
-    'overflow:hidden'
-  ].join(';');
+  wrap.style.cssText = 'width:200px;height:200px;display:flex;align-items:center;justify-content:center;overflow:hidden;';
   container.appendChild(wrap);
 
-  // Gera QR
-  const qr = new QRCode(wrap, {
+  new QRCode(wrap, {
     text: text,
     width: 200,
     height: 200,
     colorDark: '#192b1c',
     colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
+    correctLevel: QRCode.CorrectLevel.M
   });
 
-  // Garante tamanho após render (qrcodejs é assíncrono internamente)
   const fix = () => {
-    ['img','canvas'].forEach(tag => {
-      wrap.querySelectorAll(tag).forEach(el => {
-        el.style.cssText = 'width:200px!important;height:200px!important;display:block!important;max-width:none!important;';
-        el.width  = 200;
-        el.height = 200;
-      });
+    wrap.querySelectorAll('img, canvas').forEach(el => {
+      el.style.cssText = 'width:200px!important;height:200px!important;display:block!important;max-width:none!important;';
+      el.width = 200; el.height = 200;
     });
   };
-  fix();
-  setTimeout(fix, 50);
-  setTimeout(fix, 200);
+  fix(); setTimeout(fix, 50); setTimeout(fix, 200);
 }
 
-async function spGerarPix({ amount, name, email, cpf, description, canvas_id, code_id, amount_id, timer_id, copy_id }) {
+// ── Gera Pix via Sigilo Pay — mesmo padrão do site de ingressos ─────────────
+async function spGerarPix({ amount, name, email, cpf, tel, description, canvas_id, code_id, amount_id, timer_id, copy_id }) {
   const pixVal = amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   if (amount_id) document.getElementById(amount_id).textContent = pixVal;
 
-  let pixCode    = '';
-  let qrBase64   = '';
+  let pixCode = '';
 
   try {
-    // ── Chama Cloudflare Pages Function → Sigilo Pay ─────────────
-    // Payload exato conforme erro retornado pela API:
-    // campos obrigatórios: identifier, amount, client
+    // Payload idêntico ao que funciona no site de ingressos
     const payload = {
-      identifier: 'NIO-' + Date.now(),          // ID único da transação
-      amount:     parseFloat(amount.toFixed(2)), // valor em reais (ex: 100.00)
+      identifier: 'NIO-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+      amount:     parseFloat(amount.toFixed(2)),
       description: description || 'Mensalidade Nio Fibra',
       client: {
         name:     name,
         email:    email,
-        document: (cpf || '00000000000').replace(/\D/g, ''),
-        phone:    (tel || '00000000000').replace(/\D/g, ''),
-      },
+        phone:    (tel  || '').replace(/\D/g, ''),
+        document: (cpf  || '').replace(/\D/g, '')
+      }
     };
-
-    console.log('[Sigilo Pay] Payload enviado:', JSON.stringify(payload));
 
     const resp = await fetch(SP_CONFIG.proxyUrl, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(payload),
+      body:    JSON.stringify(payload)
     });
 
     const data = await resp.json();
-    console.log('[Sigilo Pay] Resposta completa:', JSON.stringify(data));
+    console.log('[Sigilo Pay] Resposta:', JSON.stringify(data));
 
-    // Sigilo Pay retorna o QR em diferentes campos — cobrimos todos
-    pixCode  = data?.pix?.qrCode
-            || data?.pix?.emv
-            || data?.qrCode
-            || data?.emv
-            || data?.pixCopiaECola
-            || data?.copia_cola
-            || data?.data?.pix?.qrCode
-            || data?.data?.qrCode
-            || '';
-
-    qrBase64 = data?.pix?.qrCodeImage
-            || data?.qrCodeBase64
-            || data?.qr_code_base64
-            || data?.data?.qrCodeBase64
-            || '';
+    // Sigilo Pay retorna: data.pix.code  (igual ao site de ingressos)
+    pixCode = data?.pix?.code
+           || data?.data?.pix?.code
+           || data?.qrCode
+           || data?.pix?.qrCode
+           || data?.pix?.emv
+           || data?.emv
+           || '';
 
   } catch (err) {
     console.error('[Sigilo Pay] Erro:', err.message);
   }
 
-  // ── Fallback demo se não veio código real ─────────────────────
+  // Fallback demo
   if (!pixCode) {
     pixCode = '00020126580014BR.GOV.BCB.PIX0136'
       + Array(32).fill(0).map(() => '0123456789abcdef'[Math.floor(Math.random()*16)]).join('')
       + '5204000053039865802BR5925NIO INTERNET FIBRA6009SAO PAULO62070503***6304ABCD';
-    console.warn('Usando Pix demo — configure SP_CONFIG.proxyUrl');
+    console.warn('[Sigilo Pay] Usando demo — verifique proxyUrl e chaves');
   }
 
-  // ── Preenche código copia-e-cola ──────────────────────────────
   if (code_id) document.getElementById(code_id).textContent = pixCode;
   if (copy_id) document.getElementById(copy_id).dataset.pix = pixCode;
-
-  // ── Renderiza QR ──────────────────────────────────────────────
-  if (canvas_id) {
-    if (qrBase64) {
-      // Se a Sigilo Pay devolveu imagem base64, usa direto (qualidade máxima)
-      const container = document.getElementById(canvas_id);
-      if (container) {
-        container.innerHTML = '';
-        const img = document.createElement('img');
-        img.src = qrBase64.startsWith('data:') ? qrBase64 : 'data:image/png;base64,' + qrBase64;
-        img.style.cssText = 'width:200px;height:200px;display:block;';
-        container.appendChild(img);
-      }
-    } else {
-      // Gera QR localmente com qrcodejs
-      spRenderQR(canvas_id, pixCode);
-    }
-  }
-
-  if (timer_id) spStartTimer(timer_id, 1800);
+  if (canvas_id) spRenderQR(canvas_id, pixCode);
+  if (timer_id)  spStartTimer(timer_id, 1800);
 
   return { success: !!pixCode, pixCode };
 }
