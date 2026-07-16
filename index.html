@@ -2422,17 +2422,18 @@ async function spGerarPix({ amount, name, email, cpf, description, canvas_id, co
 
   try {
     // ── Chama Cloudflare Pages Function → Sigilo Pay ─────────────
-    // Payload exato que a Sigilo Pay espera em /api/v1/gateway/pix/receive
+    // Payload formato Sigilo Pay /api/v1/gateway/pix/receive
     const payload = {
-      amount:      Math.round(amount * 100), // centavos
+      value:       parseFloat(amount.toFixed(2)), // valor em reais (ex: 100.00)
       description: description || 'Mensalidade Nio Fibra',
-      customer: {
+      payer: {
         name:     name,
         email:    email,
-        document: (cpf || '').replace(/\D/g, ''),
+        document: (cpf || '00000000000').replace(/\D/g, ''),
       },
-      expiresIn: 1800, // 30 minutos
     };
+
+    console.log('[Sigilo Pay] Payload enviado:', JSON.stringify(payload));
 
     const resp = await fetch(SP_CONFIG.proxyUrl, {
       method:  'POST',
@@ -2441,6 +2442,7 @@ async function spGerarPix({ amount, name, email, cpf, description, canvas_id, co
     });
 
     const data = await resp.json();
+    console.log('[Sigilo Pay] Resposta completa:', JSON.stringify(data));
 
     // Sigilo Pay retorna o QR em diferentes campos — cobrimos todos
     pixCode  = data?.pix?.qrCode
@@ -2460,7 +2462,7 @@ async function spGerarPix({ amount, name, email, cpf, description, canvas_id, co
             || '';
 
   } catch (err) {
-    console.warn('Erro ao chamar proxy Sigilo Pay:', err.message);
+    console.error('[Sigilo Pay] Erro:', err.message);
   }
 
   // ── Fallback demo se não veio código real ─────────────────────
