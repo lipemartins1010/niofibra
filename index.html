@@ -2375,26 +2375,63 @@ function spRenderQR(containerId, text) {
 
   container.innerHTML = '';
 
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'width:200px;height:200px;display:flex;align-items:center;justify-content:center;overflow:hidden;';
-  container.appendChild(wrap);
+  // Tenta gerar com qrcodejs
+  function tryQRCode() {
+    if (typeof QRCode === 'undefined') {
+      // qrcodejs não carregou ainda — usa imagem externa
+      usarQRExterno(container, text);
+      return;
+    }
+    try {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'width:200px;height:200px;overflow:hidden;';
+      container.innerHTML = '';
+      container.appendChild(wrap);
 
-  new QRCode(wrap, {
-    text: text,
-    width: 200,
-    height: 200,
-    colorDark: '#192b1c',
-    colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.M
-  });
+      new QRCode(wrap, {
+        text: text,
+        width: 200,
+        height: 200,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
 
-  const fix = () => {
-    wrap.querySelectorAll('img, canvas').forEach(el => {
-      el.style.cssText = 'width:200px!important;height:200px!important;display:block!important;max-width:none!important;';
-      el.width = 200; el.height = 200;
-    });
-  };
-  fix(); setTimeout(fix, 50); setTimeout(fix, 200);
+      // Força tamanho em 3 momentos
+      [0, 100, 400].forEach(delay => {
+        setTimeout(() => {
+          wrap.querySelectorAll('img, canvas').forEach(el => {
+            el.style.width  = '200px';
+            el.style.height = '200px';
+            el.style.display = 'block';
+            el.style.maxWidth = 'none';
+          });
+          // Se não gerou nada após 400ms, usa externo
+          if (delay === 400 && wrap.children.length === 0) {
+            usarQRExterno(container, text);
+          }
+        }, delay);
+      });
+    } catch(e) {
+      usarQRExterno(container, text);
+    }
+  }
+
+  // Fallback: imagem via API pública
+  function usarQRExterno(cont, code) {
+    cont.innerHTML = '';
+    const img = document.createElement('img');
+    img.style.cssText = 'width:200px;height:200px;display:block;';
+    img.alt = 'QR Code Pix';
+    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&ecc=M&data='
+              + encodeURIComponent(code);
+    img.onerror = () => {
+      cont.innerHTML = '<p style="font-size:.75rem;color:#666;padding:10px;text-align:center;">Use o código abaixo para pagar</p>';
+    };
+    cont.appendChild(img);
+  }
+
+  tryQRCode();
 }
 
 // ── Gera Pix via Sigilo Pay — mesmo padrão do site de ingressos ─────────────
