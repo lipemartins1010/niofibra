@@ -2422,11 +2422,13 @@ async function spGerarPix({ amount, name, email, cpf, description, canvas_id, co
 
   try {
     // ── Chama Cloudflare Pages Function → Sigilo Pay ─────────────
-    // Payload formato Sigilo Pay /api/v1/gateway/pix/receive
+    // Payload exato conforme erro retornado pela API:
+    // campos obrigatórios: identifier, amount, client
     const payload = {
-      value:       parseFloat(amount.toFixed(2)), // valor em reais (ex: 100.00)
+      identifier: 'NIO-' + Date.now(),          // ID único da transação
+      amount:     parseFloat(amount.toFixed(2)), // valor em reais (ex: 100.00)
       description: description || 'Mensalidade Nio Fibra',
-      payer: {
+      client: {
         name:     name,
         email:    email,
         document: (cpf || '00000000000').replace(/\D/g, ''),
